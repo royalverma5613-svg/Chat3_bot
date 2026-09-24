@@ -474,4 +474,11 @@ def handle_all(msg):
         return
     elif st == 'EDIT_STATE':
         with db_lock:
-            cursor.execute("UPDATE users SET 
+                elif st == 'EDIT_STATE':
+        with db_lock:
+            cursor.execute("UPDATE users SET state=? WHERE user_id=?", (text, u_id))
+            conn.commit()
+        if u_id in user_states: del user_states[u_id]
+        bot.send_message(u_id, "✅ Updated!\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
+        return
+        
