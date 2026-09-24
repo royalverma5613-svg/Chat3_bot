@@ -453,9 +453,9 @@ def handle_all(msg):
         bot.send_message(u_id, "Not in a chat. Press /search.\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
 
 
+import os
 from flask import Flask
 from threading import Thread
-import os
 
 app = Flask('')
 
@@ -472,6 +472,5 @@ def keep_alive():
 
 if __name__ == "__main__":
     keep_alive()
-    # Yahan aapka bot ka polling code aayega, jaise:
-    # bot.infinity_polling()
-    
+    # Yahan skip_pending=True lagane se purane stuck messages clear ho jayenge
+    bot.infinity_polling(skip_pending=True)
