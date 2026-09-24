@@ -13,7 +13,7 @@ from flask import Flask
 BOT_TOKEN = "8926312414:AAEg0eNRzD_q26IFjy5uTYe65Yz-Bn0ZJAg"
 CHANNEL_USERNAME = "@ai2kmm"
 ADMIN_USERNAME = "@egofiremax"
-ADMIN_GROUP = "-1004322519230"  # Admin notification group
+ADMIN_GROUP = "-1004322519230"  # Aapki Admin Group ID
 UPI_ID = "kumar.14534@superyes"
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -40,7 +40,6 @@ def init_db():
             referred_by INTEGER DEFAULT 0, last_active REAL,
             vip_warned INTEGER DEFAULT 0, username TEXT
         )''')
-        # Add new columns safely if using old database file
         try: cursor.execute("ALTER TABLE users ADD COLUMN last_active REAL")
         except: pass
         try: cursor.execute("ALTER TABLE users ADD COLUMN vip_warned INTEGER DEFAULT 0")
@@ -83,7 +82,7 @@ def is_subscribed(user_id):
         status = bot.get_chat_member(CHANNEL_USERNAME, user_id).status
         return status in ['creator', 'administrator', 'member']
     except: 
-        return False # Strictly enforce channel join (Bot must be admin in channel)
+        return False
 
 def get_user(user_id):
     with db_lock:
@@ -283,7 +282,6 @@ def invite_link(msg):
     link = f"https://t.me/{BOT_USERNAME}?start={msg.from_user.id}"
     bot.send_message(msg.chat.id, f"🎁 **Referral Program**\n🔗 {link}\nGet 2 Hours Free VIP per invite!\n\n👑 Owner: {ADMIN_USERNAME}")
 
-# === SECURE /ADDVIP SYSTEM ===
 @bot.message_handler(commands=['addvip'])
 def add_vip_start(msg):
     if msg.from_user.username == None or msg.from_user.username.lower() != ADMIN_USERNAME.replace('@', '').lower():
@@ -474,11 +472,7 @@ def handle_all(msg):
         return
     elif st == 'EDIT_STATE':
         with db_lock:
-                elif st == 'EDIT_STATE':
-        with db_lock:
             cursor.execute("UPDATE users SET state=? WHERE user_id=?", (text, u_id))
             conn.commit()
         if u_id in user_states: del user_states[u_id]
-        bot.send_message(u_id, "✅ Updated!\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
-        return
-        
+        bot.send_message(u_id, "
