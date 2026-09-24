@@ -452,9 +452,7 @@ def handle_all(msg):
     else:
         bot.send_message(u_id, "Not in a chat. Press /search.\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
 
-if __name__ == "__main__":
-    print("Bot is running...")
-    bot.infinity_polling()
+
 from flask import Flask
 from threading import Thread
 import os
