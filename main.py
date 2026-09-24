@@ -8,7 +8,7 @@ import os
 import random
 from datetime import datetime
 
-BOT_TOKEN = "8926312414:AAF6X2qy8yWJOUXPwPj7fgq0j6F9eNni9Nk"
+BOT_TOKEN = "8926312414:AAEg0eNRzD_q26IFjy5uTYe65Yz-Bn0ZJAg"
 CHANNEL_USERNAME = "@ai2kmm"
 ADMIN_USERNAME = "@egofiremax"
 UPI_ID = "kumar.14534@superyes"
