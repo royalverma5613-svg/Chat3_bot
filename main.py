@@ -13,7 +13,7 @@ from flask import Flask
 BOT_TOKEN = "8926312414:AAEg0eNRzD_q26IFjy5uTYe65Yz-Bn0ZJAg"
 CHANNEL_USERNAME = "@ai2kmm"
 ADMIN_USERNAME = "@egofiremax"
-ADMIN_GROUP = "@data5k"  # Admin notification group
+ADMIN_GROUP = "-1004322519230"  # Admin notification group
 UPI_ID = "kumar.14534@superyes"
 
 bot = telebot.TeleBot(BOT_TOKEN)
