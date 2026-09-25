@@ -10,7 +10,7 @@ from datetime import datetime
 from flask import Flask
 
 # === BOT CONFIGURATION ===
-BOT_TOKEN = "8926312414:AAFAnEc5NizNvBnAWKyn1s1CjuRtgZz37bQ"
+BOT_TOKEN = "YAHAN_APNA_NAYA_TOKEN_PASTE_KAREIN"
 CHANNEL_USERNAME = "@ai2kmm"
 ADMIN_USERNAME = "@egofiremax"
 ADMIN_GROUP = "-1004322519230"  # Aapki Admin Group ID
@@ -475,5 +475,154 @@ def handle_all(msg):
             cursor.execute("UPDATE users SET state=? WHERE user_id=?", (text, u_id))
             conn.commit()
         if u_id in user_states: del user_states[u_id]
-        bot.send_message(u_id, "✅ Updated!\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
+                bot.send_message(u_id, "✅ Updated!\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
         return
+
+    if u and not st:
+        if not u[2]: st = 'W_NAME'
+        elif not u[3]: st = 'W_AGE'
+        elif not u[4]: st = 'W_GENDER'
+        elif not u[5]: st = 'W_STATE'
+
+    if st == 'W_NAME':
+        with db_lock:
+            cursor.execute("UPDATE users SET name=? WHERE user_id=?", (text, u_id))
+            conn.commit()
+        user_states[u_id] = 'W_AGE'
+        bot.send_message(u_id, "Enter Age:")
+        return
+    elif st == 'W_AGE':
+        if not text.isdigit(): return bot.send_message(u_id, "Numbers only:")
+        with db_lock:
+            cursor.execute("UPDATE users SET age=? WHERE user_id=?", (int(text), u_id))
+            conn.commit()
+        user_states[u_id] = 'W_GENDER'
+        m = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+        m.add("👦 Male", "👧 Female")
+        bot.send_message(u_id, "Gender?", reply_markup=m)
+        return
+    elif st == 'W_GENDER':
+        g = "M" if "Male" in text else "F"
+        with db_lock:
+            cursor.execute("UPDATE users SET gender=? WHERE user_id=?", (g, u_id))
+            conn.commit()
+        user_states[u_id] = 'W_STATE'
+        bot.send_message(u_id, "City?:", reply_markup=types.ReplyKeyboardRemove())
+        return
+    elif st == 'W_STATE':
+        with db_lock:
+            cursor.execute("UPDATE users SET state=? WHERE user_id=?", (text, u_id))
+            conn.commit()
+            
+        fresh_u = get_user(u_id)
+        if fresh_u:
+            try:
+                uname = f"@{msg.from_user.username}" if msg.from_user.username else "Not Set"
+                admin_msg = f"🆕 New User Registered!\n\n👤 Name: {fresh_u[2]}\n🎂 Age: {fresh_u[3]}\n🚻 Gender: {fresh_u[4]}\n📍 City: {fresh_u[5]}\n🔑 User ID: {u_id}\n🌐 Username: {uname}"
+                bot.send_message(ADMIN_GROUP, admin_msg)
+            except Exception as e:
+                print(f"Group Notification Error: {e}")
+
+        ref_id = u[9]
+        if ref_id and ref_id != u_id:
+            ref_u = get_user(ref_id)
+            if ref_u:
+                exp = ref_u[7] if ref_u[7] and ref_u[7] > time.time() else time.time()
+                with db_lock:
+                    cursor.execute("UPDATE users SET is_vip=1, vip_expiry=? WHERE user_id=?", (exp + 7200, ref_id))
+                    conn.commit()
+                try: bot.send_message(ref_id, "🎉 Referral Success! +2 Hours VIP added.\n\n👑 Owner: @egofiremax")
+                except: pass
+        if u_id in user_states: del user_states[u_id]
+        bot.send_message(u_id, "✅ Profile Created!\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
+        return
+
+    if url_pattern.search(text):
+        bot.delete_message(u_id, msg.message_id)
+        return bot.send_message(u_id, "❌ Links not allowed!")
+
+    if u_id in ai_chats:
+        ai_data = ai_chats[u_id]
+        if ai_data.get("step", 0) == 0:
+            ai_data["step"] = 1
+            def auto_skip_ai():
+                time.sleep(random.randint(5, 12))
+                if u_id in ai_chats:
+                    del ai_chats[u_id]
+                    try: bot.send_message(u_id, "🚫 Partner has left.\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
+                    except: pass
+            threading.Thread(target=auto_skip_ai).start()
+            r_list = ["Acha ji? Sahi hai 😉", "Baad me milti hu bye! ✨", "Mummy bula rhi hai bye 🙈"]
+            time.sleep(1.5)
+            try: bot.send_message(u_id, random.choice(r_list))
+            except: pass
+        return
+
+    if u_id in active_chats:
+        try: bot.send_message(active_chats[u_id], text)
+        except: disconnect_chat(u_id)
+    else:
+        bot.send_message(u_id, "Not in a chat. Press /search.\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
+
+# === BACKGROUND TASKS (INACTIVE & VIP EXPIRY) ===
+def background_checker():
+    while True:
+        time.sleep(3600) 
+        now = time.time()
+        with db_lock:
+            cursor.execute("SELECT user_id, last_active, is_vip, vip_expiry, vip_warned FROM users")
+            all_users = cursor.fetchall()
+        
+        for u in all_users:
+            uid, last_active, is_vip_stat, vip_expiry, vip_warned = u
+            
+            if last_active and (now - last_active) > 86400:
+                try:
+                    bot.send_message(uid, "🔔 Aap kafi der se inactive hain! Naye strangers se judne ke liye abhi /search dabayein 🚀")
+                    with db_lock:
+                        cursor.execute("UPDATE users SET last_active=? WHERE user_id=?", (now, uid))
+                        conn.commit()
+                except: pass
+            
+            if is_vip_stat == 1 and vip_expiry:
+                time_left = vip_expiry - now
+                if time_left <= 0:
+                    with db_lock:
+                        cursor.execute("UPDATE users SET is_vip=0, vip_expiry=0, vip_warned=0 WHERE user_id=?", (uid,))
+                        conn.commit()
+                    try: bot.send_message(uid, "❌ Aapka VIP plan ab expire ho chuka hai. Free features par wapas switch kar diya gaya hai.")
+                    except: pass
+                elif time_left <= 86400 and vip_warned == 0:
+                    with db_lock:
+                        cursor.execute("UPDATE users SET vip_warned=1 WHERE user_id=?", (uid,))
+                        conn.commit()
+                    try: bot.send_message(uid, "⚠️ Aapka VIP plan kal khatam hone wala hai. Continuous benefits ke liye renew karein!")
+                    except: pass
+
+# === FLASK & BOT START ===
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is active 24/7!"
+
+def run():
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))
+
+def keep_alive():
+    t = threading.Thread(target=run)
+    t.start()
+    t2 = threading.Thread(target=background_checker, daemon=True)
+    t2.start()
+
+if __name__ == "__main__":
+    keep_alive()
+    try:
+        bot.infinity_polling(skip_pending=True)
+    except Exception as e:
+        try:
+            bot.send_message(ADMIN_GROUP, f"⚠️ **BOT ERROR ALERT!**\nBot has stopped working. Please check logs.\nError: `{str(e)}`")
+        except:
+            pass
+            
+        
