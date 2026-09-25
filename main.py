@@ -10,7 +10,7 @@ from datetime import datetime
 from flask import Flask
 
 # === BOT CONFIGURATION ===
-BOT_TOKEN = "YAHAN_APNA_NAYA_TOKEN_PASTE_KAREIN"
+BOT_TOKEN = "8926312414:AAFAnEc5NizNvBnAWKyn1s1CjuRtgZz37bQ"
 CHANNEL_USERNAME = "@ai2kmm"
 ADMIN_USERNAME = "@egofiremax"
 ADMIN_GROUP = "-1004322519230"  # Aapki Admin Group ID
