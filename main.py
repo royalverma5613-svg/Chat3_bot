@@ -475,8 +475,9 @@ def handle_all(msg):
             cursor.execute("UPDATE users SET state=? WHERE user_id=?", (text, u_id))
             conn.commit()
         if u_id in user_states: del user_states[u_id]
-                bot.send_message(u_id, "✅ Updated!\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
+        bot.send_message(u_id, "✅ Updated!\n\n👑 Owner: @egofiremax", reply_markup=get_main_menu())
         return
+
 
     if u and not st:
         if not u[2]: st = 'W_NAME'
